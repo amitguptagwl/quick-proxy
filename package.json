@@ -1,0 +1,19 @@
+{
+  "name": "quick-proxy",
+  "version": "1.0.0",
+  "description": "Run a quick proxy to connect a remote URL",
+  "bin" : {
+    "quick-proxy": "quick-proxy.js"
+  },
+  "keywords": ["proxy"],
+  "author": "Amit Kumar Gupta (http://amitkumargupta.work/)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amitguptagwl/quick-proxy"
+  },
+  "dependencies": {
+    "axios": "^0.20.0",
+    "pump": "^3.0.0"
+  }
+}
