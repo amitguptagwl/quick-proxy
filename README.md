@@ -1,6 +1,7 @@
 ```bash
-$ npm install -g quick-proxy
-#$ quick-proxy <port> <redirect-to> 
+$ npm install -g log-my-request
+#$ lproxy <port> <redirect-to> 
 #run in background
-$ quick-proxy 9009 https://www.google.com &
+$ lproxy 9009 https://www.google.com
+$ lproxy 9009 https://www.google.com --detail
 ```

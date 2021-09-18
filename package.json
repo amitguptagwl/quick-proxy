@@ -1,11 +1,14 @@
 {
-  "name": "quick-proxy",
-  "version": "1.0.0",
-  "description": "Run a quick proxy to connect a remote URL",
-  "bin" : {
-    "quick-proxy": "quick-proxy.js"
+  "name": "log-my-request",
+  "version": "1.0.1",
+  "description": "Proxy to log request-response for debugging purpose",
+  "bin": {
+    "lproxy": "quick-proxy.js"
   },
-  "keywords": ["proxy"],
+  "keywords": [
+    "proxy",
+    "log"
+  ],
   "author": "Amit Kumar Gupta (http://amitkumargupta.work/)",
   "license": "MIT",
   "repository": {
