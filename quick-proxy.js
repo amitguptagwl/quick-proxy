@@ -54,7 +54,7 @@ function proxyReq(reqOptions, res, reqId) {
     r(reqOptions)
         .then(function (proxyResponse) {
             copyHeaders(proxyResponse, res);
-
+            log("Headers:",  proxyResponse.headers);
             res.statusCode = proxyResponse.status;
             log(reqId + ": Status: " + proxyResponse.status);
 
