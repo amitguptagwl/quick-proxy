@@ -20,8 +20,6 @@ function requestListener(req, res) {
     const targetUrl = baseUrl + req.url;
     log(reqId + ": Request");
     console.log("→",reqId + ": " + req.method + " " + targetUrl);
-    log(reqId + ": Headers");
-    log(req.headers);
 
     let body = [];
 	req.on('error', function(err) {
@@ -31,56 +29,62 @@ function requestListener(req, res) {
 	}).on('end', () => {
 		body = Buffer.concat(body).toString();
         if(body) log(reqId + ": Payload: "+ body);
+
+        const reqOptions = {
+            url: targetUrl,
+            data: body,
+            method: req.method,
+            headers: req.headers,
+            responseType: 'stream',
+            validateStatus: () => true,
+        }
+        delete reqOptions.headers["postman-token"];
+        reqOptions.headers["host"] = (new URL(baseUrl)).hostname;
+        //reqOptions.headers["accept-encoding"] = "";
+        log("Headers used to make request", reqOptions.headers);
+
+        proxyReq(reqOptions, res, reqId);
     });
 
+    
+}
+
+function proxyReq(reqOptions, res, reqId) {
     log(reqId + ": Response");
-    const reqOptions = {
-        url: targetUrl,
-        data: body,
-        method: req.method,
-        headers: req.headers,
-        responseType: 'stream',
-        validateStatus: () => true,
-    }
-    delete reqOptions.headers["postman-token"];
-    reqOptions.headers["host"] = (new URL(baseUrl)).hostname;
-    //reqOptions.headers["accept-encoding"] = "";
-    log("Headers used to make request", reqOptions.headers);
-
     r(reqOptions)
-    .then( function(proxyResponse){
-        copyHeaders(proxyResponse,res);
-        
-        res.statusCode = proxyResponse.status;
-        log(reqId + ": Status: " + proxyResponse.status);
+        .then(function (proxyResponse) {
+            copyHeaders(proxyResponse, res);
 
-        if(logsDetail){
-            
-            let resBody = [];
-            proxyResponse.data.on('error', function(err) {
+            res.statusCode = proxyResponse.status;
+            log(reqId + ": Status: " + proxyResponse.status);
+
+            if (logsDetail) {
+
+                let resBody = [];
+                proxyResponse.data.on('error', function (err) {
+                    console.error(err);
+                }).on('data', function (chunk) {
+                    resBody.push(chunk);
+                    res.write(chunk);
+                }).on('end', () => {
+                    //resBody = Buffer.concat(resBody).toString();
+                    res.end(null);
+                    const strBody = Buffer.concat(resBody).toString();
+                    if (proxyResponse.headers["content-type"] === "application/json") {
+                        log(reqId + ": Response JSON Payload: " + JSON.stringify(JSON.parse(strBody), null, 4));
+                    } else {
+                        log(reqId + ": Response Payload: " + proxyResponse.data);
+                    }
+                });
+            } else {
+                pump(proxyResponse.data, res);
+            }
+        })
+        .catch(err => {
+            if (err.response) {
                 console.error(err);
-            }).on('data', function(chunk) {
-                resBody.push(chunk);
-                res.write(chunk);
-            }).on('end', () => {
-                //resBody = Buffer.concat(resBody).toString();
-                res.end(null);
-                const strBody = Buffer.concat(resBody).toString();
-                if(proxyResponse.headers["content-type"] === "application/json"){
-                    log(reqId + ": Response JSON Payload: "+ JSON.stringify(JSON.parse(strBody), null, 4));
-                }else{
-                    log(reqId + ": Response Payload: "+ proxyResponse.data);
-                }
-            });
-        }else{
-            pump( proxyResponse.data, res);
-        }
-    })
-    .catch( err => {
-        if (err.response) {
-            console.error(err);
-        }
-    })
+            }
+        });
 }
 
 function copyHeaders(from,to){
