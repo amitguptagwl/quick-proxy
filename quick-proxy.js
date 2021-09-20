@@ -6,6 +6,10 @@ const http = require('http');
 const { random } = require('./util');
 
 const logsDetail = process.argv.indexOf("--detail") !== -1
+let delay = process.argv.indexOf("--delay");
+if(delay){
+    delay = process.argv[++delay];
+}
 const port = Number.parseInt(process.argv[2]);
 const server = http.createServer(requestListener);
 const baseUrl = process.argv[3];
@@ -43,7 +47,9 @@ function requestListener(req, res) {
         //reqOptions.headers["accept-encoding"] = "";
         log("Headers used to make request", reqOptions.headers);
 
-        proxyReq(reqOptions, res, reqId);
+        setTimeout(() => {
+            proxyReq(reqOptions, res, reqId);
+        }, delay || 0);
     });
 
     
